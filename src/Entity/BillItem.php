@@ -17,6 +17,7 @@ use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
 use Tourze\EasyAdmin\Attribute\Column\ListColumn;
 use Tourze\EasyAdmin\Attribute\Filter\Filterable;
 use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
+use Tourze\Symfony\BillOrderBundle\Enum\BillItemStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillItemRepository;
 
 #[AsPermission(title: '账单明细')]
@@ -38,8 +39,36 @@ class BillItem implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?BillOrder $bill = null;
 
+    #[Filterable]
+    #[IndexColumn]
+    #[ListColumn(order: 10, sorter: true)]
     #[ORM\Column(length: 50, options: ['comment' => '状态'])]
-    private ?string $status = null;
+    private string $status = BillItemStatus::PENDING->value;
+    
+    #[Filterable]
+    #[IndexColumn]
+    #[ListColumn(order: 20)]
+    #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => '产品ID'])]
+    private ?string $productId = null;
+    
+    #[ListColumn(order: 30)]
+    #[ORM\Column(length: 255, nullable: false, options: ['comment' => '产品名称'])]
+    private ?string $productName = null;
+    
+    #[ListColumn(order: 40, sorter: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '单价', 'default' => 0])]
+    private ?string $price = '0';
+    
+    #[ListColumn(order: 50, sorter: true)]
+    #[ORM\Column(type: Types::INTEGER, options: ['comment' => '数量', 'default' => 1])]
+    private ?int $quantity = 1;
+    
+    #[ListColumn(order: 60, sorter: true)]
+    #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '小计金额', 'default' => 0])]
+    private ?string $subtotal = '0';
+    
+    #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '备注'])]
+    private ?string $remark = null;
 
     #[CreateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
@@ -98,14 +127,114 @@ class BillItem implements \Stringable
         return $this;
     }
 
-    public function getStatus(): ?string
+    /**
+     * 获取明细状态
+     */
+    public function getStatus(): string
     {
         return $this->status;
     }
-
-    public function setStatus(string $status): static
+    
+    /**
+     * 获取明细状态枚举对象
+     */
+    public function getStatusEnum(): BillItemStatus
     {
-        $this->status = $status;
+        return BillItemStatus::from($this->status);
+    }
+
+    /**
+     * 设置明细状态
+     */
+    public function setStatus(string|BillItemStatus $status): static
+    {
+        if ($status instanceof BillItemStatus) {
+            $this->status = $status->value;
+        } else {
+            $this->status = $status;
+        }
+
+        return $this;
+    }
+    
+    public function getProductId(): ?string
+    {
+        return $this->productId;
+    }
+
+    public function setProductId(string $productId): static
+    {
+        $this->productId = $productId;
+
+        return $this;
+    }
+    
+    public function getProductName(): ?string
+    {
+        return $this->productName;
+    }
+
+    public function setProductName(string $productName): static
+    {
+        $this->productName = $productName;
+
+        return $this;
+    }
+    
+    public function getPrice(): ?string
+    {
+        return $this->price;
+    }
+
+    public function setPrice(string $price): static
+    {
+        $this->price = $price;
+        $this->calculateSubtotal();
+
+        return $this;
+    }
+    
+    public function getQuantity(): ?int
+    {
+        return $this->quantity;
+    }
+
+    public function setQuantity(int $quantity): static
+    {
+        $this->quantity = $quantity;
+        $this->calculateSubtotal();
+
+        return $this;
+    }
+    
+    public function getSubtotal(): ?string
+    {
+        return $this->subtotal;
+    }
+
+    public function setSubtotal(string $subtotal): static
+    {
+        $this->subtotal = $subtotal;
+
+        return $this;
+    }
+    
+    /**
+     * 计算小计金额
+     */
+    private function calculateSubtotal(): void
+    {
+        $this->subtotal = bcmul($this->price ?? '0', (string)$this->quantity ?? '0', 2);
+    }
+    
+    public function getRemark(): ?string
+    {
+        return $this->remark;
+    }
+
+    public function setRemark(?string $remark): static
+    {
+        $this->remark = $remark;
 
         return $this;
     }
