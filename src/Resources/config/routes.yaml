@@ -1,0 +1,3 @@
+bill_order_controllers:
+  resource: '../../Controller/'
+  type: attribute
