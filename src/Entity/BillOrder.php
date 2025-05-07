@@ -298,8 +298,10 @@ class BillOrder implements \Stringable
         $total = '0';
 
         foreach ($this->items as $item) {
-            $itemTotal = bcmul($item->getPrice() ?? '0', (string)$item->getQuantity() ?? '0', 2);
-            $total = bcadd($total, $itemTotal, 2);
+            $subtotal = $item->getSubtotal();
+            if ($subtotal) {
+                $total = bcadd($total, $subtotal, 2);
+            }
         }
 
         $this->setTotalAmount($total);

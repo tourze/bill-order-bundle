@@ -226,7 +226,7 @@ class BillOrderService
         $totalAmount = $this->billItemRepository->getTotalAmountByBillId($bill->getId());
         $bill->setTotalAmount($totalAmount);
         
-        $this->entityManager->flush();
+        // 不在这里调用flush，让调用方负责调用flush
         
         if ($oldTotal !== $totalAmount) {
             $this->logger->info('更新账单总金额', [

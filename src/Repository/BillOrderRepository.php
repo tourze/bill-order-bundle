@@ -39,12 +39,14 @@ class BillOrderRepository extends ServiceEntityRepository
      */
     public function findByStatus(BillOrderStatus $status): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('o.status = :status')
             ->setParameter('status', $status->value)
             ->orderBy('o.createTime', 'DESC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -72,7 +74,8 @@ class BillOrderRepository extends ServiceEntityRepository
                 ->setParameter('status', $status->value);
         }
         
-        return $qb->getQuery()->getResult();
+        $result = $qb->getQuery()->getResult();
+        return $result ?: [];
     }
     
     /**
@@ -82,12 +85,14 @@ class BillOrderRepository extends ServiceEntityRepository
      */
     public function findUnpaidBills(): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('o.status = :status')
             ->setParameter('status', BillOrderStatus::PENDING->value)
             ->orderBy('o.createTime', 'ASC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -97,12 +102,14 @@ class BillOrderRepository extends ServiceEntityRepository
      */
     public function findPaidButNotCompletedBills(): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('o.status = :status')
             ->setParameter('status', BillOrderStatus::PAID->value)
             ->orderBy('o.payTime', 'ASC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -113,12 +120,14 @@ class BillOrderRepository extends ServiceEntityRepository
      */
     public function findByCreator(string $createdBy): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('o.createdBy = :createdBy')
             ->setParameter('createdBy', $createdBy)
             ->orderBy('o.createTime', 'DESC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -129,12 +138,14 @@ class BillOrderRepository extends ServiceEntityRepository
      */
     public function searchBills(string $keyword): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('o.billNumber LIKE :keyword OR o.title LIKE :keyword')
             ->setParameter('keyword', '%' . $keyword . '%')
             ->orderBy('o.createTime', 'DESC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**

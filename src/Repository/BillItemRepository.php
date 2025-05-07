@@ -39,12 +39,14 @@ class BillItemRepository extends ServiceEntityRepository
      */
     public function findByBillId(string $billId): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('i.bill = :billId')
             ->setParameter('billId', $billId)
             ->orderBy('i.createTime', 'ASC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -55,12 +57,14 @@ class BillItemRepository extends ServiceEntityRepository
      */
     public function findByProductId(string $productId): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('i.productId = :productId')
             ->setParameter('productId', $productId)
             ->orderBy('i.createTime', 'DESC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -71,12 +75,14 @@ class BillItemRepository extends ServiceEntityRepository
      */
     public function findByStatus(BillItemStatus $status): array
     {
-        return $this->getBaseQueryBuilder()
+        $result = $this->getBaseQueryBuilder()
             ->andWhere('i.status = :status')
             ->setParameter('status', $status->value)
             ->orderBy('i.createTime', 'DESC')
             ->getQuery()
             ->getResult();
+            
+        return $result ?: [];
     }
     
     /**
@@ -111,7 +117,8 @@ class BillItemRepository extends ServiceEntityRepository
             ->orderBy('orderCount', 'DESC')
             ->setMaxResults($limit);
             
-        return $queryBuilder->getQuery()->getResult();
+        $result = $queryBuilder->getQuery()->getResult();
+        return $result ?: [];
     }
     
     /**
