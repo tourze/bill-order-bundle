@@ -2,6 +2,7 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Command;
 
+use Brick\Math\BigDecimal;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
@@ -69,7 +70,7 @@ class BillStatisticsCommand extends Command
                 ]);
 
                 $totalCount += $data['count'];
-                $totalAmount = bcadd($totalAmount, $data['totalAmount'], 2);
+                $totalAmount = BigDecimal::of($totalAmount)->plus($data['totalAmount'])->toScale(2);
             }
 
             $table->addRow(['<info>总计</info>', $totalCount, number_format((float)$totalAmount, 2) . ' 元']);

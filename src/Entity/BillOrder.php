@@ -2,6 +2,7 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Entity;
 
+use Brick\Math\BigDecimal;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -298,7 +299,7 @@ class BillOrder implements \Stringable
         foreach ($this->items as $item) {
             $subtotal = $item->getSubtotal();
             if ($subtotal) {
-                $total = bcadd($total, $subtotal, 2);
+                $total = BigDecimal::of($total)->plus($subtotal)->toScale(2);
             }
         }
 

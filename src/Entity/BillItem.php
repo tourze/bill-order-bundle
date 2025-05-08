@@ -2,6 +2,7 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Entity;
 
+use Brick\Math\BigDecimal;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
@@ -222,7 +223,7 @@ class BillItem implements \Stringable
      */
     private function calculateSubtotal(): void
     {
-        $this->subtotal = bcmul($this->price ?? '0', (string)$this->quantity ?? '0', 2);
+        $this->subtotal = BigDecimal::of($this->price ?? 0)->multipliedBy($this->quantity ?? 0)->toScale(2);
     }
     
     public function getRemark(): ?string
