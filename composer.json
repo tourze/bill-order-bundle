@@ -12,7 +12,12 @@
     "symfony/config": "^6.4",
     "doctrine/dbal": "^4.0",
     "doctrine/doctrine-bundle": "^2.13",
-    "psr/log": "^3|^2|^1"
+    "psr/log": "^3|^2|^1",
+    "symfony/console": "^6.4",
+    "tourze/doctrine-timestamp-bundle": "0.0.*",
+    "tourze/doctrine-snowflake-bundle": "0.1.*",
+    "tourze/doctrine-indexed-bundle": "0.0.*",
+    "doctrine/persistence": "^3.1 || ^4"
   },
   "license": "MIT",
   "autoload": {
