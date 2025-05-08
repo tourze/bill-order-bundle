@@ -41,8 +41,8 @@ class BillItem implements \Stringable
     #[Filterable]
     #[IndexColumn]
     #[ListColumn(order: 10, sorter: true)]
-    #[ORM\Column(length: 50, options: ['comment' => '状态'])]
-    private string $status = BillItemStatus::PENDING->value;
+    #[ORM\Column(length: 50, enumType: BillItemStatus::class, options: ['comment' => '状态'])]
+    private BillItemStatus $status = BillItemStatus::PENDING;
     
     #[Filterable]
     #[IndexColumn]
@@ -129,29 +129,17 @@ class BillItem implements \Stringable
     /**
      * 获取明细状态
      */
-    public function getStatus(): string
+    public function getStatus(): BillItemStatus
     {
         return $this->status;
-    }
-    
-    /**
-     * 获取明细状态枚举对象
-     */
-    public function getStatusEnum(): BillItemStatus
-    {
-        return BillItemStatus::from($this->status);
     }
 
     /**
      * 设置明细状态
      */
-    public function setStatus(string|BillItemStatus $status): static
+    public function setStatus(BillItemStatus $status): static
     {
-        if ($status instanceof BillItemStatus) {
-            $this->status = $status->value;
-        } else {
-            $this->status = $status;
-        }
+        $this->status = $status;
 
         return $this;
     }

@@ -204,7 +204,7 @@ class BillOrderServiceTest extends TestCase
         $item->setProductName('测试产品');
         $item->setPrice('100.00');
         $item->setQuantity(2);
-        $item->setStatus(BillItemStatus::PENDING->value);
+        $item->setStatus(BillItemStatus::PENDING);
         
         // 预期操作
         $this->entityManager->expects($this->once())
