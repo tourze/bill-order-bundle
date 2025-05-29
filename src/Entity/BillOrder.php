@@ -27,8 +27,6 @@ use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
 #[ORM\Table(name: 'order_bill_order', options: ['comment' => '账单表'])]
 class BillOrder implements \Stringable
 {
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
