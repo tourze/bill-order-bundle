@@ -107,7 +107,7 @@ class BillCleanupCommand extends Command
             try {
                 $this->billOrderService->cancelBill($bill, $cancelReason);
                 $cancelledCount++;
-            } catch (\Throwable $e) {
+            } catch  (\Throwable $e) {
                 $errors[] = sprintf('账单 %s (%s) 取消失败: %s', $bill->getId(), $bill->getBillNumber(), $e->getMessage());
             }
             $progressBar->advance();
