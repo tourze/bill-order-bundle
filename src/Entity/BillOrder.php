@@ -14,14 +14,9 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\Symfony\BillOrderBundle\Enum\BillOrderStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
 
-#[AsPermission(title: '账单')]
 #[ORM\Entity(repositoryClass: BillOrderRepository::class)]
 #[ORM\Table(name: 'order_bill_order', options: ['comment' => '账单表'])]
 class BillOrder implements \Stringable
@@ -36,16 +31,10 @@ class BillOrder implements \Stringable
     #[ORM\OneToMany(targetEntity: BillItem::class, mappedBy: 'bill', orphanRemoval: true)]
     private Collection $items;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 10, sorter: true)]
-    #[ExportColumn]
     #[ORM\Column(length: 50, options: ['comment' => '账单状态'])]
     private BillOrderStatus $status = BillOrderStatus::DRAFT;
 
-    #[Filterable]
-    #[ListColumn(order: 20, sorter: true)]
-    #[ExportColumn]
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '账单总金额', 'default' => 0])]
     private ?string $totalAmount = '0';
 

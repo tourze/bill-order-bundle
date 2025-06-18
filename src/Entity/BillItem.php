@@ -12,22 +12,15 @@ use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
 use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
-use Tourze\EasyAdmin\Attribute\Column\ExportColumn;
-use Tourze\EasyAdmin\Attribute\Column\ListColumn;
-use Tourze\EasyAdmin\Attribute\Filter\Filterable;
-use Tourze\EasyAdmin\Attribute\Permission\AsPermission;
 use Tourze\Symfony\BillOrderBundle\Enum\BillItemStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillItemRepository;
 
-#[AsPermission(title: '账单明细')]
 #[ORM\Entity(repositoryClass: BillItemRepository::class)]
 #[ORM\Table(name: 'order_bill_item', options: ['comment' => '账单明细'])]
 #[ORM\UniqueConstraint(name: 'order_bill_item_idx_uniq', columns: ['bill_id', 'product_id'])]
 class BillItem implements \Stringable
 {
     use TimestampableAware;
-    #[ExportColumn]
-    #[ListColumn(order: -1, sorter: true)]
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -38,31 +31,23 @@ class BillItem implements \Stringable
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
     private ?BillOrder $bill = null;
 
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 10, sorter: true)]
     #[ORM\Column(length: 50, enumType: BillItemStatus::class, options: ['comment' => '状态'])]
     private BillItemStatus $status = BillItemStatus::PENDING;
     
-    #[Filterable]
     #[IndexColumn]
-    #[ListColumn(order: 20)]
     #[ORM\Column(type: Types::BIGINT, nullable: false, options: ['comment' => '产品ID'])]
     private ?string $productId = null;
     
-    #[ListColumn(order: 30)]
     #[ORM\Column(length: 255, nullable: false, options: ['comment' => '产品名称'])]
     private ?string $productName = null;
     
-    #[ListColumn(order: 40, sorter: true)]
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '单价', 'default' => 0])]
     private ?string $price = '0';
     
-    #[ListColumn(order: 50, sorter: true)]
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '数量', 'default' => 1])]
     private ?int $quantity = 1;
     
-    #[ListColumn(order: 60, sorter: true)]
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '小计金额', 'default' => 0])]
     private ?string $subtotal = '0';
     
