@@ -100,7 +100,7 @@ class BillOrderServiceTest extends TestCase
                     && $item->getProductName() === '测试产品'
                     && $item->getPrice() === '100.00'
                     && $item->getQuantity() === 2
-                    && $item->getStatus() === BillItemStatus::PENDING->value;
+                    && $item->getStatus() === BillItemStatus::PENDING;
             }));
             
         $this->entityManager->expects($this->once())
@@ -228,7 +228,7 @@ class BillOrderServiceTest extends TestCase
         $this->assertSame($item, $result);
         $this->assertEquals('75.00', $result->getPrice());
         $this->assertEquals(1, $result->getQuantity());
-        $this->assertEquals(BillItemStatus::PROCESSED->value, $result->getStatus());
+        $this->assertEquals(BillItemStatus::PROCESSED, $result->getStatus());
         $this->assertEquals('150.00', $bill->getTotalAmount());
     }
     
