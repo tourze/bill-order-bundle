@@ -122,7 +122,7 @@ class BillItemTest extends TestCase
      */
     public function testCreateTimeGetterSetter(): void
     {
-        $date = new \DateTime('2023-01-01 12:00:00');
+        $date = new \DateTimeImmutable('2023-01-01 12:00:00');
         $this->item->setCreateTime($date);
         $this->assertSame($date, $this->item->getCreateTime());
 
@@ -135,7 +135,7 @@ class BillItemTest extends TestCase
      */
     public function testUpdateTimeGetterSetter(): void
     {
-        $date = new \DateTime('2023-01-01 12:00:00');
+        $date = new \DateTimeImmutable('2023-01-01 12:00:00');
         $this->item->setUpdateTime($date);
         $this->assertSame($date, $this->item->getUpdateTime());
 

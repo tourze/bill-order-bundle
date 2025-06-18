@@ -109,7 +109,6 @@ class BillOrderRepositoryTest extends TestCase
         
         // 验证结果
         $this->assertSame($expectedResult, $result);
-        $this->assertIsArray($result);
     }
     
     /**
@@ -151,7 +150,6 @@ class BillOrderRepositoryTest extends TestCase
         
         // 验证结果
         $this->assertSame($expectedResult, $result);
-        $this->assertIsArray($result);
     }
     
     /**
@@ -191,7 +189,6 @@ class BillOrderRepositoryTest extends TestCase
         
         // 验证结果
         $this->assertSame($expectedResult, $result);
-        $this->assertIsArray($result);
     }
     
     /**
@@ -233,7 +230,6 @@ class BillOrderRepositoryTest extends TestCase
         
         // 验证结果
         $this->assertSame($expectedResult, $result);
-        $this->assertIsArray($result);
     }
     
     /**

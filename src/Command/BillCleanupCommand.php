@@ -80,7 +80,7 @@ class BillCleanupCommand extends Command
 
         $io->note(sprintf('找到 %d 个超过 %d 天未支付的账单', $count, $days));
 
-        if ($dryRun) {
+        if ($dryRun === true) {
             $io->table(
                 ['ID', '账单编号', '创建时间', '金额'],
                 array_map(function (BillOrder $bill) {

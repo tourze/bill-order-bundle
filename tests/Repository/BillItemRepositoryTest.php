@@ -192,9 +192,6 @@ class BillItemRepositoryTest extends TestCase
         
         // 验证结果
         $this->assertSame($expectedResult, $result);
-        
-        // 额外断言：确保结果是数组类型
-        $this->assertIsArray($result);
     }
     
     /**
@@ -222,7 +219,6 @@ class BillItemRepositoryTest extends TestCase
         
         // 验证结果
         $this->assertSame($expectedResult, $result);
-        $this->assertIsString($result);
     }
     
     /**
@@ -255,7 +251,6 @@ class BillItemRepositoryTest extends TestCase
         $result = $mockRepo->getPopularProducts(5);
         
         // 验证结果
-        $this->assertIsArray($result);
         $this->assertCount(1, $result);
         $this->assertEquals('PROD001', $result[0]['productId']);
         $this->assertEquals('产品1', $result[0]['productName']);
