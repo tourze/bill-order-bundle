@@ -15,7 +15,7 @@ use Tourze\Symfony\BillOrderBundle\Service\BillOrderService;
 use Tourze\Symfony\CronJob\Attribute\AsCronTask;
 
 #[AsCommand(
-    name: 'bill:cleanup',
+    name: self::NAME,
     description: '清理处理过期未支付的账单',
 )]
 #[AsCronTask(expression: '0 1 * * *')] // 每天凌晨1点执行

@@ -12,8 +12,7 @@ use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
 use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
 use Tourze\DoctrineSnowflakeBundle\Service\SnowflakeIdGenerator;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
-use Tourze\DoctrineUserBundle\Attribute\CreatedByColumn;
-use Tourze\DoctrineUserBundle\Attribute\UpdatedByColumn;
+use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\Symfony\BillOrderBundle\Enum\BillOrderStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
 
@@ -22,6 +21,7 @@ use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
 class BillOrder implements \Stringable
 {
     use TimestampableAware;
+    use BlameableAware;
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'CUSTOM')]
     #[ORM\CustomIdGenerator(SnowflakeIdGenerator::class)]
@@ -47,16 +47,9 @@ class BillOrder implements \Stringable
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '账单备注'])]
     private ?string $remark = null;
 
-    #[ORM\Column(type: Types::DATETIME_MUTABLE, nullable: true, options: ['comment' => '付款时间'])]
-    private ?\DateTimeInterface $payTime = null;
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '付款时间'])]
+    private ?\DateTimeImmutable $payTime = null;
 
-    #[CreatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '创建人'])]
-    private ?string $createdBy = null;
-
-    #[UpdatedByColumn]
-    #[ORM\Column(nullable: true, options: ['comment' => '更新人'])]
-    private ?string $updatedBy = null;
 
     #[CreateIpColumn]
     #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
@@ -181,12 +174,12 @@ class BillOrder implements \Stringable
         return $this;
     }
 
-    public function getPayTime(): ?\DateTimeInterface
+    public function getPayTime(): ?\DateTimeImmutable
     {
         return $this->payTime;
     }
 
-    public function setPayTime(?\DateTimeInterface $payTime): static
+    public function setPayTime(?\DateTimeImmutable $payTime): static
     {
         $this->payTime = $payTime;
 
@@ -217,29 +210,7 @@ class BillOrder implements \Stringable
         return $this;
     }
 
-    public function setCreatedBy(?string $createdBy): self
-    {
-        $this->createdBy = $createdBy;
-
-        return $this;
-    }
-
-    public function getCreatedBy(): ?string
-    {
-        return $this->createdBy;
-    }
-
-    public function setUpdatedBy(?string $updatedBy): self
-    {
-        $this->updatedBy = $updatedBy;
-
-        return $this;
-    }
-
-    public function getUpdatedBy(): ?string
-    {
-        return $this->updatedBy;
-    }/**
+    /**
      * 计算账单总金额
      */
     public function calculateTotalAmount(): void

@@ -15,7 +15,7 @@ use Tourze\Symfony\BillOrderBundle\Service\BillOrderService;
 use Tourze\Symfony\CronJob\Attribute\AsCronTask;
 
 #[AsCommand(
-    name: 'bill:statistics',
+    name: self::NAME,
     description: '获取账单统计信息',
 )]
 #[AsCronTask(expression: '@daily')]
