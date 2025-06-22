@@ -87,7 +87,7 @@ class BillCleanupCommand extends Command
                     return [
                         $bill->getId(),
                         $bill->getBillNumber(),
-                        $bill->getCreateTime() ? $bill->getCreateTime()->format('Y-m-d H:i:s') : '-',
+                        $bill->getCreateTime() !== null ? $bill->getCreateTime()->format('Y-m-d H:i:s') : '-',
                         $bill->getTotalAmount(),
                     ];
                 }, $expiredBills)

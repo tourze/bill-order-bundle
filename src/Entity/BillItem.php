@@ -43,13 +43,13 @@ class BillItem implements \Stringable
     private ?string $productName = null;
     
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '单价', 'default' => 0])]
-    private ?string $price = '0';
+    private string $price = '0';
     
     #[ORM\Column(type: Types::INTEGER, options: ['comment' => '数量', 'default' => 1])]
-    private ?int $quantity = 1;
+    private int $quantity = 1;
     
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '小计金额', 'default' => 0])]
-    private ?string $subtotal = '0';
+    private string $subtotal = '0';
     
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '备注'])]
     private ?string $remark = null;
@@ -70,7 +70,7 @@ class BillItem implements \Stringable
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null) {
             return '';
         }
 
@@ -131,7 +131,7 @@ class BillItem implements \Stringable
         return $this;
     }
     
-    public function getPrice(): ?string
+    public function getPrice(): string
     {
         return $this->price;
     }
@@ -144,7 +144,7 @@ class BillItem implements \Stringable
         return $this;
     }
     
-    public function getQuantity(): ?int
+    public function getQuantity(): int
     {
         return $this->quantity;
     }
@@ -157,7 +157,7 @@ class BillItem implements \Stringable
         return $this;
     }
     
-    public function getSubtotal(): ?string
+    public function getSubtotal(): string
     {
         return $this->subtotal;
     }
@@ -174,7 +174,7 @@ class BillItem implements \Stringable
      */
     private function calculateSubtotal(): void
     {
-        $this->subtotal = BigDecimal::of($this->price ?? 0)->multipliedBy($this->quantity ?? 0)->toScale(2);
+        $this->subtotal = BigDecimal::of($this->price)->multipliedBy($this->quantity)->toScale(2);
     }
     
     public function getRemark(): ?string

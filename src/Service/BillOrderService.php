@@ -195,7 +195,7 @@ class BillOrderService
             $this->logger->warning('尝试移除不属于该账单的项目', [
                 'billId' => $bill->getId(),
                 'itemId' => $item->getId(),
-                'itemBillId' => $item->getBill() ? $item->getBill()->getId() : null,
+                'itemBillId' => $item->getBill() !== null ? $item->getBill()->getId() : null,
             ]);
             return false;
         }
@@ -258,7 +258,7 @@ class BillOrderService
 
         // 如果是变为已支付状态，记录支付时间
         if ($status === BillOrderStatus::PAID) {
-            $bill->setPayTime(new \DateTime());
+            $bill->setPayTime(new \DateTimeImmutable());
         }
 
         $this->entityManager->flush();

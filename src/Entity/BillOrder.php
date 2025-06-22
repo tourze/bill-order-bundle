@@ -36,7 +36,7 @@ class BillOrder implements \Stringable
     private BillOrderStatus $status = BillOrderStatus::DRAFT;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '账单总金额', 'default' => 0])]
-    private ?string $totalAmount = '0';
+    private string $totalAmount = '0';
 
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '账单标题'])]
     private ?string $title = null;
@@ -71,7 +71,7 @@ class BillOrder implements \Stringable
 
     public function __toString(): string
     {
-        if (!$this->getId()) {
+        if ($this->getId() === null) {
             return '';
         }
 
@@ -126,7 +126,7 @@ class BillOrder implements \Stringable
         return $this;
     }
 
-    public function getTotalAmount(): ?string
+    public function getTotalAmount(): string
     {
         return $this->totalAmount;
     }
