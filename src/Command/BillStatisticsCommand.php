@@ -73,7 +73,7 @@ class BillStatisticsCommand extends Command
                 $totalAmount = BigDecimal::of($totalAmount)->plus($data['totalAmount'])->toScale(2);
             }
 
-            $table->addRow(['<info>总计</info>', $totalCount, number_format((float)$totalAmount, 2) . ' 元']);
+            $table->addRow(['<info>总计</info>', $totalCount, number_format((float)$totalAmount->__toString(), 2) . ' 元']);
             $table->render();
         }
 

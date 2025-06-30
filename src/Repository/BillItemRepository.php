@@ -46,7 +46,7 @@ class BillItemRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -64,7 +64,7 @@ class BillItemRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -82,7 +82,7 @@ class BillItemRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -100,7 +100,7 @@ class BillItemRepository extends ServiceEntityRepository
             ->getQuery()
             ->getSingleScalarResult();
             
-        return $result ?: '0';
+        return $result ?? '0';
     }
     
     /**
@@ -118,7 +118,7 @@ class BillItemRepository extends ServiceEntityRepository
             ->setMaxResults($limit);
             
         $result = $queryBuilder->getQuery()->getResult();
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**

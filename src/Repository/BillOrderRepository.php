@@ -46,7 +46,7 @@ class BillOrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -75,7 +75,7 @@ class BillOrderRepository extends ServiceEntityRepository
         }
         
         $result = $qb->getQuery()->getResult();
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -92,7 +92,7 @@ class BillOrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -109,7 +109,7 @@ class BillOrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -127,7 +127,7 @@ class BillOrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -145,7 +145,7 @@ class BillOrderRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
             
-        return $result ?: [];
+        return $result ?? [];
     }
     
     /**
@@ -173,7 +173,7 @@ class BillOrderRepository extends ServiceEntityRepository
                 ->andWhere('o.status = :status')
                 ->setParameter('status', $status)
                 ->getQuery()
-                ->getSingleScalarResult() ?: 0;
+                ->getSingleScalarResult() ?? 0;
                 
             $statistics[$status] = [
                 'count' => $count,

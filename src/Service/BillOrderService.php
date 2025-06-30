@@ -9,6 +9,8 @@ use Tourze\Symfony\BillOrderBundle\Entity\BillItem;
 use Tourze\Symfony\BillOrderBundle\Entity\BillOrder;
 use Tourze\Symfony\BillOrderBundle\Enum\BillItemStatus;
 use Tourze\Symfony\BillOrderBundle\Enum\BillOrderStatus;
+use Tourze\Symfony\BillOrderBundle\Exception\EmptyBillException;
+use Tourze\Symfony\BillOrderBundle\Exception\InvalidBillStatusException;
 use Tourze\Symfony\BillOrderBundle\Repository\BillItemRepository;
 use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
 
@@ -287,7 +289,7 @@ class BillOrderService
                 'billId' => $bill->getId(),
                 'currentStatus' => $bill->getStatus(),
             ]);
-            throw new \InvalidArgumentException($message);
+            throw new InvalidBillStatusException($message);
         }
 
         $this->logger->info('账单支付', [
@@ -313,7 +315,7 @@ class BillOrderService
                 'billId' => $bill->getId(),
                 'currentStatus' => $bill->getStatus(),
             ]);
-            throw new \InvalidArgumentException($message);
+            throw new InvalidBillStatusException($message);
         }
 
         // 将所有账单项目标记为已处理
@@ -350,7 +352,7 @@ class BillOrderService
                 'billId' => $bill->getId(),
                 'currentStatus' => $bill->getStatus(),
             ]);
-            throw new \InvalidArgumentException($message);
+            throw new InvalidBillStatusException($message);
         }
 
         if ($reason !== null) {
@@ -390,7 +392,7 @@ class BillOrderService
                 'billId' => $bill->getId(),
                 'currentStatus' => $bill->getStatus(),
             ]);
-            throw new \InvalidArgumentException($message);
+            throw new InvalidBillStatusException($message);
         }
 
         if ($bill->getItems()->isEmpty()) {
@@ -398,7 +400,7 @@ class BillOrderService
             $this->logger->warning($message, [
                 'billId' => $bill->getId(),
             ]);
-            throw new \InvalidArgumentException($message);
+            throw new EmptyBillException($message);
         }
 
         $this->logger->info('提交账单', [

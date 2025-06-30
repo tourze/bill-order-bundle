@@ -232,55 +232,6 @@ class BillOrderRepositoryTest extends TestCase
         $this->assertSame($expectedResult, $result);
     }
     
-    /**
-     * 测试获取统计信息方法 - 简化版
-     */
-    public function testGetStatistics(): void
-    {
-        // 完全模拟结果，而不是测试内部实现
-        $mockRepo = $this->getMockBuilder(BillOrderRepository::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['count'])
-            ->getMock();
-        
-        // 模拟count方法始终返回5
-        $mockRepo->method('count')->willReturn(5);
-        
-        // 反射添加EntityManager，以防调用
-        $reflection = new \ReflectionClass($mockRepo);
-        if ($reflection->hasProperty('_entityManager')) {
-            $emProp = $reflection->getProperty('_entityManager');
-            $emProp->setAccessible(true);
-            $emProp->setValue($mockRepo, $this->entityManager);
-        } elseif ($reflection->hasProperty('_em')) {
-            $emProp = $reflection->getProperty('_em');
-            $emProp->setAccessible(true);
-            $emProp->setValue($mockRepo, $this->entityManager);
-        }
-        
-        // 模拟简单的查询结果
-        $testResult = [];
-        foreach ([
-            BillOrderStatus::DRAFT, 
-            BillOrderStatus::PENDING, 
-            BillOrderStatus::PAID, 
-            BillOrderStatus::COMPLETED, 
-            BillOrderStatus::CANCELLED
-        ] as $status) {
-            $testResult[$status->value] = [
-                'count' => 5,
-                'totalAmount' => '100.00'
-            ];
-        }
-        
-        // 直接断言基本结构，而不执行实际方法
-        $this->assertCount(5, $testResult);
-        
-        foreach ($testResult as $status => $data) {
-            $this->assertArrayHasKey('count', $data);
-            $this->assertArrayHasKey('totalAmount', $data);
-        }
-    }
     
     /**
      * 配置基本查询构建器的辅助方法

@@ -373,7 +373,7 @@ class BillOrderServiceTest extends TestCase
             ->method('flush');
             
         // 期望抛出异常
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Tourze\Symfony\BillOrderBundle\Exception\InvalidBillStatusException::class);
         $this->expectExceptionMessage('只有待支付状态的账单可以进行支付操作');
             
         // 执行测试
@@ -466,7 +466,7 @@ class BillOrderServiceTest extends TestCase
             ->method('flush');
             
         // 期望抛出异常
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(\Tourze\Symfony\BillOrderBundle\Exception\EmptyBillException::class);
         $this->expectExceptionMessage('账单必须至少包含一个项目才能提交');
         
         // 执行测试

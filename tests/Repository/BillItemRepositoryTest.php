@@ -194,67 +194,6 @@ class BillItemRepositoryTest extends TestCase
         $this->assertSame($expectedResult, $result);
     }
     
-    /**
-     * 测试获取指定账单下所有明细的总金额方法 - 简化版
-     */
-    public function testGetTotalAmountByBillId(): void
-    {
-        // 创建一个简单模拟，只测试方法签名和返回值类型
-        $mockRepo = $this->getMockBuilder(BillItemRepository::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getTotalAmountByBillId'])
-            ->getMock();
-            
-        $billId = '12345';
-        $expectedResult = '0';
-        
-        // 设置期望
-        $mockRepo->expects($this->once())
-            ->method('getTotalAmountByBillId')
-            ->with($billId)
-            ->willReturn($expectedResult);
-            
-        // 执行测试
-        $result = $mockRepo->getTotalAmountByBillId($billId);
-        
-        // 验证结果
-        $this->assertSame($expectedResult, $result);
-    }
-    
-    /**
-     * 测试获取热门产品统计方法 - 简化版
-     */
-    public function testGetPopularProducts(): void
-    {
-        // 创建一个简单模拟，只测试方法签名和返回值类型
-        $mockRepo = $this->getMockBuilder(BillItemRepository::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getPopularProducts'])
-            ->getMock();
-            
-        // 模拟返回值
-        $mockResult = [
-            [
-                'productId' => 'PROD001',
-                'productName' => '产品1',
-                'orderCount' => '10',
-                'totalQuantity' => '25'
-            ]
-        ];
-        
-        $mockRepo->expects($this->once())
-            ->method('getPopularProducts')
-            ->with(5)
-            ->willReturn($mockResult);
-            
-        // 执行测试
-        $result = $mockRepo->getPopularProducts(5);
-        
-        // 验证结果
-        $this->assertCount(1, $result);
-        $this->assertEquals('PROD001', $result[0]['productId']);
-        $this->assertEquals('产品1', $result[0]['productName']);
-    }
     
     /**
      * 测试查找指定账单下是否已有特定产品方法

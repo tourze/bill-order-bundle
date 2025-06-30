@@ -6,7 +6,11 @@ services:
 
   Tourze\Symfony\BillOrderBundle\Command\:
     resource: '../../Command/'
+    tags: ['console.command']
+    
   Tourze\Symfony\BillOrderBundle\Repository\:
     resource: '../../Repository/'
+    tags: ['doctrine.repository_service']
+    
   Tourze\Symfony\BillOrderBundle\Service\:
     resource: '../../Service/'
