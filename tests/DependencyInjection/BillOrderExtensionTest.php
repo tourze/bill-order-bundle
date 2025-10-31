@@ -2,31 +2,27 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Tests\DependencyInjection;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Tourze\PHPUnitSymfonyUnitTest\AbstractDependencyInjectionExtensionTestCase;
 use Tourze\Symfony\BillOrderBundle\DependencyInjection\BillOrderExtension;
 
-class BillOrderExtensionTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(BillOrderExtension::class)]
+final class BillOrderExtensionTest extends AbstractDependencyInjectionExtensionTestCase
 {
     private BillOrderExtension $extension;
+
     private ContainerBuilder $container;
 
     protected function setUp(): void
     {
+        parent::setUp();
         $this->extension = new BillOrderExtension();
         $this->container = new ContainerBuilder();
-    }
-
-    public function testLoadRegistersServices(): void
-    {
-        $this->extension->load([], $this->container);
-
-        // 检查关键服务是否已注册
-        $this->assertTrue($this->container->hasDefinition('Tourze\Symfony\BillOrderBundle\Service\BillOrderService'));
-        $this->assertTrue($this->container->hasDefinition('Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository'));
-        $this->assertTrue($this->container->hasDefinition('Tourze\Symfony\BillOrderBundle\Repository\BillItemRepository'));
-        $this->assertTrue($this->container->hasDefinition('Tourze\Symfony\BillOrderBundle\Command\BillCleanupCommand'));
-        $this->assertTrue($this->container->hasDefinition('Tourze\Symfony\BillOrderBundle\Command\BillStatisticsCommand'));
+        $this->container->setParameter('kernel.environment', 'test');
     }
 
     public function testLoadSetsAutoconfigureAndAutowire(): void
@@ -63,7 +59,7 @@ class BillOrderExtensionTest extends TestCase
     public function testLoadWithEmptyConfig(): void
     {
         $this->extension->load([], $this->container);
-        
+
         // 应该正常加载，没有异常
         $this->assertTrue($this->container->hasDefinition('Tourze\Symfony\BillOrderBundle\Service\BillOrderService'));
     }

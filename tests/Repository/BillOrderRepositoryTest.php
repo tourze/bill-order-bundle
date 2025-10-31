@@ -2,243 +2,178 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Tests\Repository;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Mapping\ClassMetadata;
-use Doctrine\ORM\Query;
-use Doctrine\ORM\QueryBuilder;
-use Doctrine\Persistence\ManagerRegistry;
-use PHPUnit\Framework\TestCase;
+use BizUserBundle\Entity\BizUser;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractRepositoryTestCase;
+use Tourze\Symfony\BillOrderBundle\Entity\BillItem;
 use Tourze\Symfony\BillOrderBundle\Entity\BillOrder;
 use Tourze\Symfony\BillOrderBundle\Enum\BillOrderStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
 
-class BillOrderRepositoryTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(BillOrderRepository::class)]
+#[RunTestsInSeparateProcesses]
+final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
 {
     private BillOrderRepository $repository;
-    private ManagerRegistry $registry;
-    private EntityManagerInterface $entityManager;
-    private QueryBuilder $queryBuilder;
-    private Query $query;
-    private ClassMetadata $metadata;
-    
-    protected function setUp(): void
+
+    protected function onSetUp(): void
     {
-        $this->registry = $this->createMock(ManagerRegistry::class);
-        $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        $this->queryBuilder = $this->createMock(QueryBuilder::class);
-        $this->query = $this->createMock(Query::class);
-        $this->metadata = $this->createMock(ClassMetadata::class);
-        
-        // 初始化元数据，避免ClassMetadata属性访问问题
-        $this->metadata->name = BillOrder::class;
-        
-        // 设置返回值链
-        $this->registry->method('getManagerForClass')->willReturn($this->entityManager);
-        $this->entityManager->method('getClassMetadata')->willReturn($this->metadata);
-        
-        // 默认queryBuilder设置
-        $this->entityManager->method('createQueryBuilder')->willReturn($this->queryBuilder);
-        $this->queryBuilder->method('select')->willReturnSelf();
-        $this->queryBuilder->method('from')->willReturnSelf();
-        
-        $this->repository = new BillOrderRepository($this->registry);
+        $this->repository = self::getService(BillOrderRepository::class);
+
+        // 清理测试数据
+        self::getEntityManager()->createQuery('DELETE FROM ' . BillItem::class)->execute();
+        self::getEntityManager()->createQuery('DELETE FROM ' . BillOrder::class)->execute();
+
+        // 创建基础测试数据以支持继承的测试方法
+        $user = $this->createNormalUser('fixture@example.com');
+        $this->assertInstanceOf(BizUser::class, $user);
+
+        $bill = new BillOrder();
+        $bill->setStatus(BillOrderStatus::PENDING);
+        $bill->setTotalAmount('100.00');
+        $bill->setTitle('Fixture Bill');
+        $bill->setBillNumber('BILL-FIXTURE');
+        $bill->setCreatedBy((string) $user->getId());
+
+        self::getEntityManager()->persist($bill);
+        self::getEntityManager()->flush();
     }
-    
-    /**
-     * 测试基础查询构建器方法
-     */
-    public function testGetBaseQueryBuilder(): void
+
+    protected function createNewEntity(): BillOrder
     {
-        // 配置模拟方法链
-        $this->queryBuilder->expects($this->once())
-            ->method('leftJoin')
-            ->with('o.items', 'i')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('addSelect')
-            ->with('i')
-            ->willReturnSelf();
-        
-        // 使用反射调用私有方法
-        $reflection = new \ReflectionClass($this->repository);
-        $method = $reflection->getMethod('getBaseQueryBuilder');
-        $method->setAccessible(true);
-        
-        $result = $method->invoke($this->repository);
-        
-        // 使用同一性断言不合适，因为实际上返回的是mock对象
-        // 改为验证类型
-        $this->assertInstanceOf(QueryBuilder::class, $result);
+        $user = $this->createNormalUser('entity@example.com');
+        $this->assertInstanceOf(BizUser::class, $user);
+
+        $bill = new BillOrder();
+        $bill->setStatus(BillOrderStatus::DRAFT);
+        $bill->setTotalAmount('50.00');
+        $bill->setTitle('New Entity Bill');
+        $bill->setBillNumber('BILL-NEW-ENTITY');
+        $bill->setCreatedBy((string) $user->getId());
+
+        return $bill;
     }
-    
-    /**
-     * 测试按状态查询账单方法
-     */
-    public function testFindByStatus(): void
+
+    protected function getRepository(): BillOrderRepository
     {
-        // 模拟查询构建过程
-        $this->configureBaseQueryBuilder();
-        
-        $this->queryBuilder->expects($this->once())
-            ->method('andWhere')
-            ->with('o.status = :status')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('setParameter')
-            ->with('status', BillOrderStatus::PENDING->value)
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('o.createTime', 'DESC')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($this->query);
-            
-        $expectedResult = [];
-        $this->query->expects($this->once())
-            ->method('getResult')
-            ->willReturn($expectedResult);
-        
-        // 执行测试
-        $result = $this->repository->findByStatus(BillOrderStatus::PENDING);
-        
-        // 验证结果
-        $this->assertSame($expectedResult, $result);
+        return $this->repository;
     }
-    
-    /**
-     * 测试按日期范围查询账单方法
-     */
-    public function testFindByDateRange(): void
+
+    // ====================== save 和 remove 方法测试 ======================
+
+    public function testCustomSaveWithoutFlush(): void
     {
-        // 模拟查询构建过程
-        $this->configureBaseQueryBuilder();
-        
-        $startDate = new \DateTime('2023-01-01');
-        $endDate = new \DateTime('2023-01-31');
-        
-        // 不依赖at()方法的顺序实现
-        $this->queryBuilder->expects($this->exactly(2))
-            ->method('andWhere')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->exactly(2))
-            ->method('setParameter')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('o.createTime', 'DESC')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($this->query);
-            
-        $expectedResult = [];
-        $this->query->expects($this->once())
-            ->method('getResult')
-            ->willReturn($expectedResult);
-        
-        // 执行测试
-        $result = $this->repository->findByDateRange($startDate, $endDate);
-        
-        // 验证结果
-        $this->assertSame($expectedResult, $result);
+        $user = $this->createNormalUser('test@example.com');
+        $this->assertInstanceOf(BizUser::class, $user);
+
+        $bill = new BillOrder();
+        $bill->setStatus(BillOrderStatus::DRAFT);
+        $bill->setTotalAmount('50.00');
+        $bill->setTitle('Test Bill - No Flush');
+        $bill->setBillNumber('BILL-NO-FLUSH');
+        $bill->setCreatedBy((string) $user->getId());
+
+        // 保存但不刷新
+        $this->repository->save($bill, false);
+
+        // 此时实体管理器中有数据，但数据库中还没有
+        self::getEntityManager()->flush();
+
+        // 验证数据已保存
+        $savedBill = $this->repository->find($bill->getId());
+        $this->assertNotNull($savedBill);
+        $this->assertEquals('Test Bill - No Flush', $savedBill->getTitle());
     }
-    
-    /**
-     * 测试查找未付款账单方法
-     */
-    public function testFindUnpaidBills(): void
+
+    public function testCustomRemoveWithFlush(): void
     {
-        // 模拟查询构建过程
-        $this->configureBaseQueryBuilder();
-        
-        $this->queryBuilder->expects($this->once())
-            ->method('andWhere')
-            ->with('o.status = :status')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('setParameter')
-            ->with('status', BillOrderStatus::PENDING->value)
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('o.createTime', 'ASC')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($this->query);
-            
-        $expectedResult = [];
-        $this->query->expects($this->once())
-            ->method('getResult')
-            ->willReturn($expectedResult);
-        
-        // 执行测试
-        $result = $this->repository->findUnpaidBills();
-        
-        // 验证结果
-        $this->assertSame($expectedResult, $result);
+        $user = $this->createNormalUser('test@example.com');
+        $this->assertInstanceOf(BizUser::class, $user);
+
+        $bill = new BillOrder();
+        $bill->setStatus(BillOrderStatus::DRAFT);
+        $bill->setTotalAmount('75.00');
+        $bill->setTitle('Test Bill - Remove');
+        $bill->setBillNumber('BILL-REMOVE');
+        $bill->setCreatedBy((string) $user->getId());
+
+        self::getEntityManager()->persist($bill);
+        self::getEntityManager()->flush();
+
+        $billId = $bill->getId();
+        $this->assertNotNull($billId);
+
+        // 删除并刷新
+        $this->repository->remove($bill, true);
+
+        // 验证数据已删除
+        $removedBill = $this->repository->find($billId);
+        $this->assertNull($removedBill);
     }
-    
-    /**
-     * 测试搜索账单方法
-     */
-    public function testSearchBills(): void
+
+    public function testCustomRemoveWithoutFlush(): void
     {
-        // 模拟查询构建过程
-        $this->configureBaseQueryBuilder();
-        
-        $keyword = 'test';
-        
-        $this->queryBuilder->expects($this->once())
-            ->method('andWhere')
-            ->with('o.billNumber LIKE :keyword OR o.title LIKE :keyword')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('setParameter')
-            ->with('keyword', '%test%')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('orderBy')
-            ->with('o.createTime', 'DESC')
-            ->willReturnSelf();
-            
-        $this->queryBuilder->expects($this->once())
-            ->method('getQuery')
-            ->willReturn($this->query);
-            
-        $expectedResult = [];
-        $this->query->expects($this->once())
-            ->method('getResult')
-            ->willReturn($expectedResult);
-        
-        // 执行测试
-        $result = $this->repository->searchBills($keyword);
-        
-        // 验证结果
-        $this->assertSame($expectedResult, $result);
+        $user = $this->createNormalUser('test@example.com');
+        $this->assertInstanceOf(BizUser::class, $user);
+
+        $bill = new BillOrder();
+        $bill->setStatus(BillOrderStatus::DRAFT);
+        $bill->setTotalAmount('25.00');
+        $bill->setTitle('Test Bill - Remove No Flush');
+        $bill->setBillNumber('BILL-REMOVE-NO-FLUSH');
+        $bill->setCreatedBy((string) $user->getId());
+
+        self::getEntityManager()->persist($bill);
+        self::getEntityManager()->flush();
+
+        $billId = $bill->getId();
+        $this->assertNotNull($billId);
+
+        // 删除但不刷新
+        $this->repository->remove($bill, false);
+
+        // 此时实体管理器标记为删除，但数据库中还有
+        // 手动刷新
+        self::getEntityManager()->flush();
+
+        // 验证数据已删除
+        $removedBill = $this->repository->find($billId);
+        $this->assertNull($removedBill);
     }
-    
-    
-    /**
-     * 配置基本查询构建器的辅助方法
-     */
-    private function configureBaseQueryBuilder(): void
+
+    // ====================== 基础查询功能测试 ======================
+
+    public function testBasicFindOperations(): void
     {
-        $this->queryBuilder->method('leftJoin')->willReturnSelf();
-        $this->queryBuilder->method('addSelect')->willReturnSelf();
+        $user = $this->createNormalUser('test@example.com');
+        $this->assertInstanceOf(BizUser::class, $user);
+
+        // 创建测试账单
+        $bill = new BillOrder();
+        $bill->setStatus(BillOrderStatus::PENDING);
+        $bill->setTotalAmount('100.00');
+        $bill->setTitle('Test Bill');
+        $bill->setBillNumber('BILL-TEST');
+        $bill->setCreatedBy((string) $user->getId());
+
+        self::getEntityManager()->persist($bill);
+        self::getEntityManager()->flush();
+
+        // 测试基本查询功能
+        $bills = $this->repository->findBy(['status' => BillOrderStatus::PENDING]);
+        $this->assertCount(2, $bills); // fixture中有一个 + 新创建的一个
+
+        // 测试findOneBy
+        $oneBill = $this->repository->findOneBy(['billNumber' => 'BILL-TEST']);
+        $this->assertNotNull($oneBill);
+        $this->assertEquals('Test Bill', $oneBill->getTitle());
+
+        // 测试count方法
+        $count = $this->repository->count(['status' => BillOrderStatus::PENDING]);
+        $this->assertEquals(2, $count);
     }
 }

@@ -2,17 +2,35 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Tests\Entity;
 
-use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\CoversClass;
+use Tourze\PHPUnitDoctrineEntity\AbstractEntityTestCase;
 use Tourze\Symfony\BillOrderBundle\Entity\BillItem;
 use Tourze\Symfony\BillOrderBundle\Entity\BillOrder;
+use Tourze\Symfony\BillOrderBundle\Enum\BillItemStatus;
 
-class BillItemTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(BillItem::class)]
+final class BillItemTest extends AbstractEntityTestCase
 {
-    private BillItem $item;
-
-    protected function setUp(): void
+    protected function createEntity(): BillItem
     {
-        $this->item = new BillItem();
+        return new BillItem();
+    }
+
+    /**
+     * @return \Generator<string, array{string, mixed}>
+     */
+    public static function propertiesProvider(): \Generator
+    {
+        yield 'productId' => ['productId', 'PROD001'];
+        yield 'productName' => ['productName', '测试产品'];
+        yield 'price' => ['price', '100.50'];
+        yield 'quantity' => ['quantity', 5];
+        yield 'subtotal' => ['subtotal', '502.50'];
+        yield 'remark' => ['remark', '测试备注'];
+        yield 'status' => ['status', BillItemStatus::PENDING];
     }
 
     /**
@@ -20,13 +38,15 @@ class BillItemTest extends TestCase
      */
     public function testIdGetterSetter(): void
     {
+        $item = $this->createEntity();
+
         // ID通常由数据库自动生成，因此我们用反射来设置它进行测试
-        $reflection = new \ReflectionClass($this->item);
+        $reflection = new \ReflectionClass($item);
         $property = $reflection->getProperty('id');
         $property->setAccessible(true);
-        $property->setValue($this->item, '123456789');
+        $property->setValue($item, '123456789');
 
-        $this->assertSame('123456789', $this->item->getId());
+        $this->assertSame('123456789', $item->getId());
     }
 
     /**
@@ -34,17 +54,19 @@ class BillItemTest extends TestCase
      */
     public function testToString(): void
     {
+        $item = $this->createEntity();
+
         // 设置ID
-        $reflection = new \ReflectionClass($this->item);
+        $reflection = new \ReflectionClass($item);
         $property = $reflection->getProperty('id');
         $property->setAccessible(true);
-        $property->setValue($this->item, '123456789');
+        $property->setValue($item, '123456789');
 
-        $this->assertSame('123456789', (string)$this->item);
+        $this->assertSame('123456789', (string) $item);
 
         // 测试ID为null的情况
-        $property->setValue($this->item, null);
-        $this->assertSame('', (string)$this->item);
+        $property->setValue($item, null);
+        $this->assertSame('', (string) $item);
     }
 
     /**
@@ -52,12 +74,13 @@ class BillItemTest extends TestCase
      */
     public function testBillGetterSetter(): void
     {
+        $item = $this->createEntity();
         $bill = new BillOrder();
-        $this->item->setBill($bill);
-        $this->assertSame($bill, $this->item->getBill());
+        $item->setBill($bill);
+        $this->assertSame($bill, $item->getBill());
 
-        $this->item->setBill(null);
-        $this->assertNull($this->item->getBill());
+        $item->setBill(null);
+        $this->assertNull($item->getBill());
     }
 
     /**
@@ -65,8 +88,9 @@ class BillItemTest extends TestCase
      */
     public function testProductIdGetterSetter(): void
     {
-        $this->item->setProductId('PROD001');
-        $this->assertSame('PROD001', $this->item->getProductId());
+        $item = $this->createEntity();
+        $item->setProductId('PROD001');
+        $this->assertSame('PROD001', $item->getProductId());
     }
 
     /**
@@ -74,8 +98,9 @@ class BillItemTest extends TestCase
      */
     public function testProductNameGetterSetter(): void
     {
-        $this->item->setProductName('测试产品');
-        $this->assertSame('测试产品', $this->item->getProductName());
+        $item = $this->createEntity();
+        $item->setProductName('测试产品');
+        $this->assertSame('测试产品', $item->getProductName());
     }
 
     /**
@@ -83,8 +108,9 @@ class BillItemTest extends TestCase
      */
     public function testPriceGetterSetter(): void
     {
-        $this->item->setPrice('100.50');
-        $this->assertSame('100.50', $this->item->getPrice());
+        $item = $this->createEntity();
+        $item->setPrice('100.50');
+        $this->assertSame('100.50', $item->getPrice());
     }
 
     /**
@@ -92,8 +118,9 @@ class BillItemTest extends TestCase
      */
     public function testQuantityGetterSetter(): void
     {
-        $this->item->setQuantity(5);
-        $this->assertSame(5, $this->item->getQuantity());
+        $item = $this->createEntity();
+        $item->setQuantity(5);
+        $this->assertSame(5, $item->getQuantity());
     }
 
     /**
@@ -101,8 +128,9 @@ class BillItemTest extends TestCase
      */
     public function testSubtotalGetterSetter(): void
     {
-        $this->item->setSubtotal('502.50');
-        $this->assertSame('502.50', $this->item->getSubtotal());
+        $item = $this->createEntity();
+        $item->setSubtotal('502.50');
+        $this->assertSame('502.50', $item->getSubtotal());
     }
 
     /**
@@ -110,11 +138,12 @@ class BillItemTest extends TestCase
      */
     public function testRemarkGetterSetter(): void
     {
-        $this->item->setRemark('测试备注');
-        $this->assertSame('测试备注', $this->item->getRemark());
+        $item = $this->createEntity();
+        $item->setRemark('测试备注');
+        $this->assertSame('测试备注', $item->getRemark());
 
-        $this->item->setRemark(null);
-        $this->assertNull($this->item->getRemark());
+        $item->setRemark(null);
+        $this->assertNull($item->getRemark());
     }
 
     /**
@@ -122,12 +151,13 @@ class BillItemTest extends TestCase
      */
     public function testCreateTimeGetterSetter(): void
     {
+        $item = $this->createEntity();
         $date = new \DateTimeImmutable('2023-01-01 12:00:00');
-        $this->item->setCreateTime($date);
-        $this->assertSame($date, $this->item->getCreateTime());
+        $item->setCreateTime($date);
+        $this->assertSame($date, $item->getCreateTime());
 
-        $this->item->setCreateTime(null);
-        $this->assertNull($this->item->getCreateTime());
+        $item->setCreateTime(null);
+        $this->assertNull($item->getCreateTime());
     }
 
     /**
@@ -135,12 +165,13 @@ class BillItemTest extends TestCase
      */
     public function testUpdateTimeGetterSetter(): void
     {
+        $item = $this->createEntity();
         $date = new \DateTimeImmutable('2023-01-01 12:00:00');
-        $this->item->setUpdateTime($date);
-        $this->assertSame($date, $this->item->getUpdateTime());
+        $item->setUpdateTime($date);
+        $this->assertSame($date, $item->getUpdateTime());
 
-        $this->item->setUpdateTime(null);
-        $this->assertNull($this->item->getUpdateTime());
+        $item->setUpdateTime(null);
+        $this->assertNull($item->getUpdateTime());
     }
 
     /**
@@ -148,11 +179,12 @@ class BillItemTest extends TestCase
      */
     public function testCreatedByGetterSetter(): void
     {
-        $this->item->setCreatedBy('user1');
-        $this->assertSame('user1', $this->item->getCreatedBy());
+        $item = $this->createEntity();
+        $item->setCreatedBy('user1');
+        $this->assertSame('user1', $item->getCreatedBy());
 
-        $this->item->setCreatedBy(null);
-        $this->assertNull($this->item->getCreatedBy());
+        $item->setCreatedBy(null);
+        $this->assertNull($item->getCreatedBy());
     }
 
     /**
@@ -160,11 +192,12 @@ class BillItemTest extends TestCase
      */
     public function testUpdatedByGetterSetter(): void
     {
-        $this->item->setUpdatedBy('user2');
-        $this->assertSame('user2', $this->item->getUpdatedBy());
+        $item = $this->createEntity();
+        $item->setUpdatedBy('user2');
+        $this->assertSame('user2', $item->getUpdatedBy());
 
-        $this->item->setUpdatedBy(null);
-        $this->assertNull($this->item->getUpdatedBy());
+        $item->setUpdatedBy(null);
+        $this->assertNull($item->getUpdatedBy());
     }
 
     /**
@@ -172,11 +205,12 @@ class BillItemTest extends TestCase
      */
     public function testCreatedFromIpGetterSetter(): void
     {
-        $this->item->setCreatedFromIp('127.0.0.1');
-        $this->assertSame('127.0.0.1', $this->item->getCreatedFromIp());
+        $item = $this->createEntity();
+        $item->setCreatedFromIp('127.0.0.1');
+        $this->assertSame('127.0.0.1', $item->getCreatedFromIp());
 
-        $this->item->setCreatedFromIp(null);
-        $this->assertNull($this->item->getCreatedFromIp());
+        $item->setCreatedFromIp(null);
+        $this->assertNull($item->getCreatedFromIp());
     }
 
     /**
@@ -184,11 +218,12 @@ class BillItemTest extends TestCase
      */
     public function testUpdatedFromIpGetterSetter(): void
     {
-        $this->item->setUpdatedFromIp('192.168.1.1');
-        $this->assertSame('192.168.1.1', $this->item->getUpdatedFromIp());
+        $item = $this->createEntity();
+        $item->setUpdatedFromIp('192.168.1.1');
+        $this->assertSame('192.168.1.1', $item->getUpdatedFromIp());
 
-        $this->item->setUpdatedFromIp(null);
-        $this->assertNull($this->item->getUpdatedFromIp());
+        $item->setUpdatedFromIp(null);
+        $this->assertNull($item->getUpdatedFromIp());
     }
 
     /**
@@ -196,19 +231,21 @@ class BillItemTest extends TestCase
      */
     public function testCalculateSubtotal(): void
     {
+        $item = $this->createEntity();
+
         // 设置价格和数量
-        $this->item->setPrice('10.50');
-        $this->item->setQuantity(2);
+        $item->setPrice('10.50');
+        $item->setQuantity(2);
 
         // 验证小计是否正确计算
-        $this->assertSame('21.00', $this->item->getSubtotal());
+        $this->assertSame('21.00', $item->getSubtotal());
 
         // 修改数量，验证小计是否更新
-        $this->item->setQuantity(3);
-        $this->assertSame('31.50', $this->item->getSubtotal());
+        $item->setQuantity(3);
+        $this->assertSame('31.50', $item->getSubtotal());
 
         // 修改价格，验证小计是否更新
-        $this->item->setPrice('20.00');
-        $this->assertSame('60.00', $this->item->getSubtotal());
+        $item->setPrice('20.00');
+        $this->assertSame('60.00', $item->getSubtotal());
     }
 }

@@ -1,0 +1,44 @@
+{# bill-order-bundle/templates/admin/field/bill_items.html.twig #}
+{# 显示账单明细的模板 #}
+
+{% if field.value %}
+    <div class="bill-items-container">
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>产品名称</th>
+                    <th>单价</th>
+                    <th>数量</th>
+                    <th>小计</th>
+                    <th>状态</th>
+                    <th>备注</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in field.value %}
+                    <tr>
+                        <td>{{ item.productName }}</td>
+                        <td>¥{{ item.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>¥{{ item.subtotal }}</td>
+                        <td>
+                            {% set statusValue = item.status.value ?? item.status %}
+                            <span class="badge badge-secondary">
+                                {{ statusValue }}
+                            </span>
+                        </td>
+                        <td>{{ item.remark|default('-') }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">
+                            暂无账单明细
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <span class="text-muted">暂无账单明细</span>
+{% endif %}

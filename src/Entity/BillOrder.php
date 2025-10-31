@@ -7,9 +7,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 use Tourze\DoctrineIndexedBundle\Attribute\IndexColumn;
-use Tourze\DoctrineIpBundle\Attribute\CreateIpColumn;
-use Tourze\DoctrineIpBundle\Attribute\UpdateIpColumn;
+use Tourze\DoctrineIpBundle\Traits\IpTraceableAware;
 use Tourze\DoctrineSnowflakeBundle\Traits\SnowflakeKeyAware;
 use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
@@ -23,47 +23,50 @@ class BillOrder implements \Stringable
     use TimestampableAware;
     use BlameableAware;
     use SnowflakeKeyAware;
+    use IpTraceableAware;
 
+    /**
+     * @var Collection<int, BillItem>
+     */
     #[ORM\OneToMany(targetEntity: BillItem::class, mappedBy: 'bill', orphanRemoval: true)]
     private Collection $items;
 
     #[IndexColumn]
-    #[ORM\Column(length: 50, options: ['comment' => '账单状态'])]
+    #[ORM\Column(type: Types::STRING, length: 50, enumType: BillOrderStatus::class, options: ['comment' => '账单状态'])]
+    #[Assert\Choice(callback: [BillOrderStatus::class, 'cases'])]
     private BillOrderStatus $status = BillOrderStatus::DRAFT;
 
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2, options: ['comment' => '账单总金额', 'default' => 0])]
+    #[Assert\NotBlank]
+    #[Assert\Length(max: 13)]
+    #[Assert\Regex(pattern: '/^\d+(\.\d{1,2})?$/', message: '总金额格式不正确')]
+    #[Assert\Range(min: 0, max: 99999999.99)]
     private string $totalAmount = '0';
 
     #[ORM\Column(length: 255, nullable: true, options: ['comment' => '账单标题'])]
+    #[Assert\Length(max: 255)]
     private ?string $title = null;
 
     #[ORM\Column(length: 50, nullable: true, options: ['comment' => '账单编号'])]
+    #[Assert\Length(max: 50)]
     private ?string $billNumber = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true, options: ['comment' => '账单备注'])]
+    #[Assert\Length(max: 2000)]
     private ?string $remark = null;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true, options: ['comment' => '付款时间'])]
+    #[Assert\Type(type: '\DateTimeImmutable')]
     private ?\DateTimeImmutable $payTime = null;
-
-
-    #[CreateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '创建时IP'])]
-    private ?string $createdFromIp = null;
-
-    #[UpdateIpColumn]
-    #[ORM\Column(length: 128, nullable: true, options: ['comment' => '更新时IP'])]
-    private ?string $updatedFromIp = null;
 
     public function __construct()
     {
         $this->items = new ArrayCollection();
     }
 
-
     public function __toString(): string
     {
-        if ($this->getId() === null) {
+        if (null === $this->getId()) {
             return '';
         }
 
@@ -78,17 +81,15 @@ class BillOrder implements \Stringable
         return $this->items;
     }
 
-    public function addItem(BillItem $item): static
+    public function addItem(BillItem $item): void
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);
             $item->setBill($this);
         }
-
-        return $this;
     }
 
-    public function removeItem(BillItem $item): static
+    public function removeItem(BillItem $item): void
     {
         if ($this->items->removeElement($item)) {
             // set the owning side to null (unless already changed)
@@ -96,8 +97,6 @@ class BillOrder implements \Stringable
                 $item->setBill(null);
             }
         }
-
-        return $this;
     }
 
     /**
@@ -111,11 +110,9 @@ class BillOrder implements \Stringable
     /**
      * 设置账单状态
      */
-    public function setStatus(BillOrderStatus $status): static
+    public function setStatus(BillOrderStatus $status): void
     {
         $this->status = $status;
-
-        return $this;
     }
 
     public function getTotalAmount(): string
@@ -123,11 +120,9 @@ class BillOrder implements \Stringable
         return $this->totalAmount;
     }
 
-    public function setTotalAmount(string $totalAmount): static
+    public function setTotalAmount(string $totalAmount): void
     {
         $this->totalAmount = $totalAmount;
-
-        return $this;
     }
 
     public function getTitle(): ?string
@@ -135,11 +130,9 @@ class BillOrder implements \Stringable
         return $this->title;
     }
 
-    public function setTitle(?string $title): static
+    public function setTitle(?string $title): void
     {
         $this->title = $title;
-
-        return $this;
     }
 
     public function getBillNumber(): ?string
@@ -147,11 +140,9 @@ class BillOrder implements \Stringable
         return $this->billNumber;
     }
 
-    public function setBillNumber(?string $billNumber): static
+    public function setBillNumber(?string $billNumber): void
     {
         $this->billNumber = $billNumber;
-
-        return $this;
     }
 
     public function getRemark(): ?string
@@ -159,11 +150,9 @@ class BillOrder implements \Stringable
         return $this->remark;
     }
 
-    public function setRemark(?string $remark): static
+    public function setRemark(?string $remark): void
     {
         $this->remark = $remark;
-
-        return $this;
     }
 
     public function getPayTime(): ?\DateTimeImmutable
@@ -171,35 +160,9 @@ class BillOrder implements \Stringable
         return $this->payTime;
     }
 
-    public function setPayTime(?\DateTimeImmutable $payTime): static
+    public function setPayTime(?\DateTimeImmutable $payTime): void
     {
         $this->payTime = $payTime;
-
-        return $this;
-    }
-
-    public function getCreatedFromIp(): ?string
-    {
-        return $this->createdFromIp;
-    }
-
-    public function setCreatedFromIp(?string $createdFromIp): static
-    {
-        $this->createdFromIp = $createdFromIp;
-
-        return $this;
-    }
-
-    public function getUpdatedFromIp(): ?string
-    {
-        return $this->updatedFromIp;
-    }
-
-    public function setUpdatedFromIp(?string $updatedFromIp): static
-    {
-        $this->updatedFromIp = $updatedFromIp;
-
-        return $this;
     }
 
     /**
@@ -211,7 +174,7 @@ class BillOrder implements \Stringable
 
         foreach ($this->items as $item) {
             $subtotal = $item->getSubtotal();
-            if ($subtotal) {
+            if ('' !== $subtotal) {
                 $total = BigDecimal::of($total)->plus($subtotal)->toScale(2);
             }
         }

@@ -2,6 +2,7 @@
 
 namespace Tourze\Symfony\BillOrderBundle\Enum;
 
+use Tourze\EnumExtra\BadgeInterface;
 use Tourze\EnumExtra\Itemable;
 use Tourze\EnumExtra\ItemTrait;
 use Tourze\EnumExtra\Labelable;
@@ -11,7 +12,7 @@ use Tourze\EnumExtra\SelectTrait;
 /**
  * 账单状态枚举
  */
-enum BillOrderStatus: string implements Labelable, Itemable, Selectable
+enum BillOrderStatus: string implements Labelable, Itemable, Selectable, BadgeInterface
 {
     use ItemTrait;
     use SelectTrait;
@@ -20,18 +21,32 @@ enum BillOrderStatus: string implements Labelable, Itemable, Selectable
     case PAID = 'paid';         // 已付款
     case COMPLETED = 'completed'; // 已完成
     case CANCELLED = 'cancelled'; // 已取消
-    
+
     /**
      * 获取状态对应的中文描述
      */
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::DRAFT => '草稿',
             self::PENDING => '待付款',
             self::PAID => '已付款',
             self::COMPLETED => '已完成',
             self::CANCELLED => '已取消',
+        };
+    }
+
+    /**
+     * 获取状态对应的徽章颜色
+     */
+    public function getBadge(): string
+    {
+        return match ($this) {
+            self::DRAFT => BadgeInterface::SECONDARY,
+            self::PENDING => BadgeInterface::WARNING,
+            self::PAID => BadgeInterface::INFO,
+            self::COMPLETED => BadgeInterface::SUCCESS,
+            self::CANCELLED => BadgeInterface::DANGER,
         };
     }
 }

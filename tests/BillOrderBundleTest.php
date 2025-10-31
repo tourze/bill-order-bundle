@@ -1,30 +1,19 @@
 <?php
 
-namespace Tourze\Symfony\BillOrderBundle\Tests;
+declare(strict_types=1);
 
-use PHPUnit\Framework\TestCase;
+namespace BillOrderBundle\Tests;
+
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use Tourze\PHPUnitSymfonyKernelTest\AbstractBundleTestCase;
 use Tourze\Symfony\BillOrderBundle\BillOrderBundle;
-use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class BillOrderBundleTest extends TestCase
+/**
+ * @internal
+ */
+#[CoversClass(BillOrderBundle::class)]
+#[RunTestsInSeparateProcesses]
+final class BillOrderBundleTest extends AbstractBundleTestCase
 {
-    /**
-     * 测试 Bundle 类继承
-     */
-    public function testBundleInheritance(): void
-    {
-        $bundle = new BillOrderBundle();
-        
-        $this->assertInstanceOf(Bundle::class, $bundle);
-    }
-    
-    /**
-     * 测试 Bundle 能够被实例化
-     */
-    public function testBundleCanBeInstantiated(): void
-    {
-        $bundle = new BillOrderBundle();
-        
-        $this->assertNotNull($bundle);
-    }
 }

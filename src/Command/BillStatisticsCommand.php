@@ -25,8 +25,7 @@ class BillStatisticsCommand extends Command
 
     public function __construct(
         private readonly BillOrderService $billOrderService,
-    )
-    {
+    ) {
         parent::__construct(self::NAME);
     }
 
@@ -39,7 +38,8 @@ class BillStatisticsCommand extends Command
                 InputOption::VALUE_OPTIONAL,
                 '输出格式 (table, json)',
                 'table'
-            );
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -50,8 +50,14 @@ class BillStatisticsCommand extends Command
         $statistics = $this->billOrderService->getBillStatistics();
         $format = $input->getOption('format');
 
-        if ($format === 'json') {
-            $io->writeln(json_encode($statistics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        if ('json' === $format) {
+            $json = json_encode($statistics, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            if (false === $json) {
+                $io->error('无法序列化统计数据为JSON格式');
+
+                return Command::FAILURE;
+            }
+            $io->writeln($json);
         } else {
             $table = new Table($output);
             $table->setHeaders(['状态', '数量', '总金额']);
@@ -66,14 +72,14 @@ class BillStatisticsCommand extends Command
                 $table->addRow([
                     $statusLabel,
                     $data['count'],
-                    number_format((float)$data['totalAmount'], 2) . ' 元',
+                    number_format((float) $data['totalAmount'], 2) . ' 元',
                 ]);
 
                 $totalCount += $data['count'];
                 $totalAmount = BigDecimal::of($totalAmount)->plus($data['totalAmount'])->toScale(2);
             }
 
-            $table->addRow(['<info>总计</info>', $totalCount, number_format((float)$totalAmount->__toString(), 2) . ' 元']);
+            $table->addRow(['<info>总计</info>', $totalCount, number_format((float) (string) $totalAmount, 2) . ' 元']);
             $table->render();
         }
 
@@ -87,6 +93,7 @@ class BillStatisticsCommand extends Command
     {
         try {
             $enum = BillOrderStatus::from($status);
+
             return $enum->getLabel();
         } catch (\ValueError $e) {
             return $status;
