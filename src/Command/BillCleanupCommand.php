@@ -92,7 +92,8 @@ class BillCleanupCommand extends Command
         $date = new \DateTime();
         $date->modify("-{$days} days");
 
-        return $this->billOrderRepository->createQueryBuilder('o')
+        /** @var array<BillOrder> $result */
+        $result = $this->billOrderRepository->createQueryBuilder('o')
             ->where('o.status = :status')
             ->andWhere('o.createTime < :date')
             ->setParameter('status', BillOrderStatus::PENDING->value)
@@ -100,6 +101,8 @@ class BillCleanupCommand extends Command
             ->getQuery()
             ->getResult()
         ;
+
+        return $result;
     }
 
     /**

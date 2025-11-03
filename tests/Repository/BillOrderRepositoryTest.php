@@ -30,14 +30,14 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
 
         // 创建基础测试数据以支持继承的测试方法
         $user = $this->createNormalUser('fixture@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::PENDING);
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Fixture Bill');
         $bill->setBillNumber('BILL-FIXTURE');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
         self::getEntityManager()->flush();
@@ -46,14 +46,14 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
     protected function createNewEntity(): BillOrder
     {
         $user = $this->createNormalUser('entity@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::DRAFT);
         $bill->setTotalAmount('50.00');
         $bill->setTitle('New Entity Bill');
         $bill->setBillNumber('BILL-NEW-ENTITY');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         return $bill;
     }
@@ -68,14 +68,14 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
     public function testCustomSaveWithoutFlush(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::DRAFT);
         $bill->setTotalAmount('50.00');
         $bill->setTitle('Test Bill - No Flush');
         $bill->setBillNumber('BILL-NO-FLUSH');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         // 保存但不刷新
         $this->repository->save($bill, false);
@@ -92,14 +92,14 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
     public function testCustomRemoveWithFlush(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::DRAFT);
         $bill->setTotalAmount('75.00');
         $bill->setTitle('Test Bill - Remove');
         $bill->setBillNumber('BILL-REMOVE');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
         self::getEntityManager()->flush();
@@ -118,14 +118,14 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
     public function testCustomRemoveWithoutFlush(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::DRAFT);
         $bill->setTotalAmount('25.00');
         $bill->setTitle('Test Bill - Remove No Flush');
         $bill->setBillNumber('BILL-REMOVE-NO-FLUSH');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
         self::getEntityManager()->flush();
@@ -150,7 +150,7 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
     public function testBasicFindOperations(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         // 创建测试账单
         $bill = new BillOrder();
@@ -158,7 +158,7 @@ final class BillOrderRepositoryTest extends AbstractRepositoryTestCase
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Test Bill');
         $bill->setBillNumber('BILL-TEST');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
         self::getEntityManager()->flush();

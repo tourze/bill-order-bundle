@@ -31,14 +31,14 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
 
         // 创建基础测试数据以支持继承的测试方法
         $user = $this->createNormalUser('fixture@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::PENDING);
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Fixture Bill');
         $bill->setBillNumber('BILL-FIXTURE');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
 
@@ -50,7 +50,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $item->setPrice('100.00');
         $item->setSubtotal('100.00');
         $item->setStatus(BillItemStatus::PENDING);
-        $item->setCreatedBy((string) $user->getId());
+        $item->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($item);
         self::getEntityManager()->flush();
@@ -59,14 +59,14 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
     protected function createNewEntity(): BillItem
     {
         $user = $this->createNormalUser('entity@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         $bill = new BillOrder();
         $bill->setStatus(BillOrderStatus::PENDING);
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Test Bill');
         $bill->setBillNumber('BILL-NEW-ENTITY');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
         self::getEntityManager()->flush();
@@ -79,7 +79,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $item->setPrice('100.00');
         $item->setSubtotal('100.00');
         $item->setStatus(BillItemStatus::PENDING);
-        $item->setCreatedBy((string) $user->getId());
+        $item->setCreatedBy($user->getUserIdentifier());
 
         return $item;
     }
@@ -94,7 +94,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
     public function testCustomSave(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         // 创建测试账单
         $bill = new BillOrder();
@@ -102,7 +102,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Test Bill');
         $bill->setBillNumber('BILL-TEST');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
         self::getEntityManager()->flush();
@@ -116,7 +116,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $item->setPrice('50.00');
         $item->setSubtotal('100.00');
         $item->setStatus(BillItemStatus::PENDING);
-        $item->setCreatedBy((string) $user->getId());
+        $item->setCreatedBy($user->getUserIdentifier());
 
         // 测试 save 方法
         $this->repository->save($item);
@@ -130,7 +130,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
     public function testCustomRemove(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         // 创建测试账单
         $bill = new BillOrder();
@@ -138,7 +138,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Test Bill');
         $bill->setBillNumber('BILL-TEST');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
 
@@ -151,7 +151,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $item->setPrice('50.00');
         $item->setSubtotal('100.00');
         $item->setStatus(BillItemStatus::PENDING);
-        $item->setCreatedBy((string) $user->getId());
+        $item->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($item);
         self::getEntityManager()->flush();
@@ -172,7 +172,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
     public function testBasicFindOperations(): void
     {
         $user = $this->createNormalUser('test@example.com');
-        $this->assertInstanceOf(BizUser::class, $user);
+        $this->assertInstanceOf(\Symfony\Component\Security\Core\User\UserInterface::class, $user);
 
         // 创建测试账单
         $bill = new BillOrder();
@@ -180,7 +180,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $bill->setTotalAmount('100.00');
         $bill->setTitle('Test Bill');
         $bill->setBillNumber('BILL-TEST');
-        $bill->setCreatedBy((string) $user->getId());
+        $bill->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($bill);
 
@@ -193,7 +193,7 @@ final class BillItemRepositoryTest extends AbstractRepositoryTestCase
         $item->setPrice('50.00');
         $item->setSubtotal('100.00');
         $item->setStatus(BillItemStatus::PENDING);
-        $item->setCreatedBy((string) $user->getId());
+        $item->setCreatedBy($user->getUserIdentifier());
 
         self::getEntityManager()->persist($item);
         self::getEntityManager()->flush();

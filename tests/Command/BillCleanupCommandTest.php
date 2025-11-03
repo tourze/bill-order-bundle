@@ -65,15 +65,27 @@ final class BillCleanupCommandTest extends AbstractCommandTestCase
     {
         $bills = [];
         for ($i = 1; $i <= 5; ++$i) {
-            // 使用具体类 BillOrder Mock：
+            // 使用具体类 BillOrder：
             // 1) Entity 类是数据模型，通常没有对应的接口
-            // 2) 测试中需要模拟实体的各种属性和方法，使用具体类更合适
+            // 2) 由于 getId() 和 getCreateTime() 是 final 方法，无法 Mock，使用反射设置属性值
             // 3) 这是测试数据创建，不涉及实际的业务逻辑解耦
-            $bill = $this->createMock(BillOrder::class);
-            $bill->method('getId')->willReturn((string) $i);
-            $bill->method('getBillNumber')->willReturn('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
-            $bill->method('getCreateTime')->willReturn(new \DateTimeImmutable('-10 days'));
-            $bill->method('getTotalAmount')->willReturn('100.00');
+            $bill = new BillOrder();
+            $bill->setBillNumber('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
+            $bill->setTotalAmount('100.00');
+
+            // 使用反射设置 final 方法的属性值
+            $reflection = new \ReflectionClass($bill);
+
+            // 设置 ID
+            $idProperty = $reflection->getProperty('id');
+            $idProperty->setAccessible(true);
+            $idProperty->setValue($bill, (string) $i);
+
+            // 设置创建时间
+            $createTimeProperty = $reflection->getProperty('createTime');
+            $createTimeProperty->setAccessible(true);
+            $createTimeProperty->setValue($bill, new \DateTimeImmutable('-10 days'));
+
             $bills[] = $bill;
         }
 
@@ -102,13 +114,21 @@ final class BillCleanupCommandTest extends AbstractCommandTestCase
     {
         $bills = [];
         for ($i = 1; $i <= 3; ++$i) {
-            // 使用具体类 BillOrder Mock：
+            // 使用具体类 BillOrder：
             // 1) Entity 类是数据模型，通常没有对应的接口
-            // 2) 测试中需要模拟实体的各种属性和方法，使用具体类更合适
+            // 2) 由于 getId() 是 final 方法，无法 Mock，使用反射设置属性值
             // 3) 这是测试数据创建，不涉及实际的业务逻辑解耦
-            $bill = $this->createMock(BillOrder::class);
-            $bill->method('getId')->willReturn((string) $i);
-            $bill->method('getBillNumber')->willReturn('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
+            $bill = new BillOrder();
+            $bill->setBillNumber('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
+
+            // 使用反射设置 final 方法的属性值
+            $reflection = new \ReflectionClass($bill);
+
+            // 设置 ID
+            $idProperty = $reflection->getProperty('id');
+            $idProperty->setAccessible(true);
+            $idProperty->setValue($bill, (string) $i);
+
             $bills[] = $bill;
         }
 
@@ -155,13 +175,20 @@ final class BillCleanupCommandTest extends AbstractCommandTestCase
 
     public function testExecuteWithException(): void
     {
-        // 使用具体类 BillOrder Mock：
+        // 使用具体类 BillOrder：
         // 1) Entity 类是数据模型，通常没有对应的接口
-        // 2) 测试中需要模拟实体的各种属性和方法，使用具体类更合适
+        // 2) 由于 getId() 是 final 方法，无法 Mock，使用反射设置属性值
         // 3) 这是测试数据创建，不涉及实际的业务逻辑解耦
-        $bill = $this->createMock(BillOrder::class);
-        $bill->method('getId')->willReturn('1');
-        $bill->method('getBillNumber')->willReturn('BILL-00001');
+        $bill = new BillOrder();
+        $bill->setBillNumber('BILL-00001');
+
+        // 使用反射设置 final 方法的属性值
+        $reflection = new \ReflectionClass($bill);
+
+        // 设置 ID
+        $idProperty = $reflection->getProperty('id');
+        $idProperty->setAccessible(true);
+        $idProperty->setValue($bill, '1');
 
         $queryBuilder = $this->createMock(QueryBuilder::class);
         $query = $this->createMock(Query::class);
@@ -190,13 +217,21 @@ final class BillCleanupCommandTest extends AbstractCommandTestCase
     {
         $bills = [];
         for ($i = 1; $i <= 3; ++$i) {
-            // 使用具体类 BillOrder Mock：
+            // 使用具体类 BillOrder：
             // 1) Entity 类是数据模型，通常没有对应的接口
-            // 2) 测试中需要模拟实体的各种属性和方法，使用具体类更合适
+            // 2) 由于 getId() 是 final 方法，无法 Mock，使用反射设置属性值
             // 3) 这是测试数据创建，不涉及实际的业务逻辑解耦
-            $bill = $this->createMock(BillOrder::class);
-            $bill->method('getId')->willReturn((string) $i);
-            $bill->method('getBillNumber')->willReturn('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
+            $bill = new BillOrder();
+            $bill->setBillNumber('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
+
+            // 使用反射设置 final 方法的属性值
+            $reflection = new \ReflectionClass($bill);
+
+            // 设置 ID
+            $idProperty = $reflection->getProperty('id');
+            $idProperty->setAccessible(true);
+            $idProperty->setValue($bill, (string) $i);
+
             $bills[] = $bill;
         }
 
@@ -228,15 +263,27 @@ final class BillCleanupCommandTest extends AbstractCommandTestCase
     {
         $bills = [];
         for ($i = 1; $i <= 2; ++$i) {
-            // 使用具体类 BillOrder Mock：
+            // 使用具体类 BillOrder：
             // 1) Entity 类是数据模型，通常没有对应的接口
-            // 2) 测试中需要模拟实体的各种属性和方法，使用具体类更合适
+            // 2) 由于 getId() 和 getCreateTime() 是 final 方法，无法 Mock，使用反射设置属性值
             // 3) 这是测试数据创建，不涉及实际的业务逻辑解耦
-            $bill = $this->createMock(BillOrder::class);
-            $bill->method('getId')->willReturn((string) $i);
-            $bill->method('getBillNumber')->willReturn('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
-            $bill->method('getCreateTime')->willReturn(new \DateTimeImmutable('-10 days'));
-            $bill->method('getTotalAmount')->willReturn('150.00');
+            $bill = new BillOrder();
+            $bill->setBillNumber('BILL-' . str_pad((string) $i, 5, '0', STR_PAD_LEFT));
+            $bill->setTotalAmount('150.00');
+
+            // 使用反射设置 final 方法的属性值
+            $reflection = new \ReflectionClass($bill);
+
+            // 设置 ID
+            $idProperty = $reflection->getProperty('id');
+            $idProperty->setAccessible(true);
+            $idProperty->setValue($bill, (string) $i);
+
+            // 设置创建时间
+            $createTimeProperty = $reflection->getProperty('createTime');
+            $createTimeProperty->setAccessible(true);
+            $createTimeProperty->setValue($bill, new \DateTimeImmutable('-10 days'));
+
             $bills[] = $bill;
         }
 

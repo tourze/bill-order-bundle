@@ -90,12 +90,10 @@ final class BillItemCrudControllerTest extends AbstractEasyAdminControllerTestCa
         $controller = new BillItemCrudController();
 
         // 测试基本的CRUD配置方法存在且不抛出异常
-        $this->expectNotToPerformAssertions();
+        // 如果方法正常执行而不抛出异常，则测试通过
+        $controller->configureFields('index');
 
-        try {
-            $controller->configureFields('index');
-        } catch (\Throwable $e) {
-            self::fail('configureFields should not throw exception: ' . $e->getMessage());
-        }
+        // 这个测试验证方法能够正常调用，不返回异常即为成功
+        $this->assertTrue(true);
     }
 }
