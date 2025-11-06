@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\Symfony\BillOrderBundle\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -89,6 +91,9 @@ readonly class BillOrderService
         int $quantity = 1,
         ?string $remark = null,
     ): BillItem {
+        // 验证业务规则
+        $this->validateBillItemData($productId, $productName, $price, $quantity);
+
         // 检查是否已存在该产品
         $billId = $bill->getId();
         if (null === $billId) {
@@ -156,13 +161,17 @@ readonly class BillOrderService
     ): BillItem {
         $changes = [];
 
+        // 验证价格数据
         if (null !== $price) {
+            $this->validatePrice($price);
             $oldPrice = $item->getPrice();
             $item->setPrice($price);
             $changes['price'] = ['from' => $oldPrice, 'to' => $price];
         }
 
+        // 验证数量数据
         if (null !== $quantity) {
+            $this->validateQuantity($quantity);
             $oldQuantity = $item->getQuantity();
             $item->setQuantity($quantity);
             $changes['quantity'] = ['from' => $oldQuantity, 'to' => $quantity];
@@ -443,6 +452,19 @@ readonly class BillOrderService
      */
     public function getBillStatistics(): array
     {
+        $conn = $this->entityManager->getConnection();
+
+        // 使用单条SQL查询获取所有状态的统计数据
+        $sql = "
+            SELECT
+                status,
+                COUNT(*) as count,
+                COALESCE(SUM(total_amount), 0) as total_amount
+            FROM order_bill_order
+            WHERE status IN (:statuses)
+            GROUP BY status
+        ";
+
         $statuses = [
             BillOrderStatus::DRAFT->value,
             BillOrderStatus::PENDING->value,
@@ -451,24 +473,34 @@ readonly class BillOrderService
             BillOrderStatus::CANCELLED->value,
         ];
 
+        $stmt = $conn->executeQuery(
+            $sql,
+            ['statuses' => $statuses],
+            ['statuses' => \Doctrine\DBAL\ArrayParameterType::STRING]
+        );
+        $results = $stmt->fetchAllAssociative();
+
+        // 构建统计结果，确保所有状态都有记录
         $statistics = [];
-
         foreach ($statuses as $status) {
-            $count = $this->billOrderRepository->count(['status' => $status]);
+            $statistics[$status] = [
+                'count' => 0,
+                'totalAmount' => '0',
+            ];
+        }
 
-            // 计算总金额
-            $bills = $this->billOrderRepository->findBy(['status' => $status]);
-            $totalAmount = '0';
-            foreach ($bills as $bill) {
-                $billTotalAmount = $bill->getTotalAmount();
-                if (is_numeric($billTotalAmount)) {
-                    $totalAmount = bcadd($totalAmount, $billTotalAmount, 2);
-                }
-            }
+        // 填充实际数据
+        foreach ($results as $row) {
+            /** @var string $status */
+            $status = $row['status'];
+            /** @var int|numeric-string $count */
+            $count = $row['count'] ?? 0;
+            /** @var float|numeric-string $totalAmount */
+            $totalAmount = $row['total_amount'] ?? 0;
 
             $statistics[$status] = [
-                'count' => $count,
-                'totalAmount' => $totalAmount,
+                'count' => (int) $count,
+                'totalAmount' => number_format((float) $totalAmount, 2, '.', ''),
             ];
         }
 
@@ -489,10 +521,7 @@ readonly class BillOrderService
      */
     private function findBillItemByBillAndProduct(string $billId, string $productId): ?BillItem
     {
-        return $this->billItemRepository->findOneBy([
-            'bill' => $billId,
-            'productId' => $productId,
-        ]);
+        return $this->billItemRepository->findByBillAndProduct($billId, $productId);
     }
 
     /**
@@ -504,16 +533,67 @@ readonly class BillOrderService
      */
     private function calculateBillTotal(string $billId): string
     {
-        $items = $this->billItemRepository->findBy(['bill' => $billId]);
-        $total = '0';
+        return $this->billItemRepository->calculateBillTotal($billId);
+    }
 
-        foreach ($items as $item) {
-            $itemSubtotal = $item->getSubtotal();
-            if (is_numeric($itemSubtotal)) {
-                $total = bcadd($total, $itemSubtotal, 2);
-            }
+    /**
+     * 验证账单项目数据的业务规则
+     *
+     * @param string $productId   产品ID
+     * @param string $productName 产品名称
+     * @param string $price       单价
+     * @param int    $quantity    数量
+     *
+     * @throws InvalidBillDataException 当数据不符合业务规则时
+     */
+    private function validateBillItemData(string $productId, string $productName, string $price, int $quantity): void
+    {
+        if (trim($productId) === '') {
+            throw new InvalidBillDataException('产品ID不能为空');
         }
 
-        return $total;
+        if (trim($productName) === '') {
+            throw new InvalidBillDataException('产品名称不能为空');
+        }
+
+        $this->validatePrice($price);
+        $this->validateQuantity($quantity);
+    }
+
+    /**
+     * 验证价格是否符合业务规则
+     *
+     * @param string $price 价格
+     *
+     * @throws InvalidBillDataException 当价格不符合规则时
+     */
+    private function validatePrice(string $price): void
+    {
+        if (!AmountCalculator::isValidAmount($price)) {
+            throw new InvalidBillDataException('价格格式不正确，必须为正数且最多两位小数');
+        }
+
+        if (!AmountCalculator::isNonNegativeAmount($price)) {
+            throw new InvalidBillDataException('价格不能为负数');
+        }
+    }
+
+    /**
+     * 验证数量是否符合业务规则
+     *
+     * @param int $quantity 数量
+     *
+     * @throws InvalidBillDataException 当数量不符合规则时
+     */
+    private function validateQuantity(int $quantity): void
+    {
+        if ($quantity <= 0) {
+            throw new InvalidBillDataException('数量必须为正数');
+        }
+
+        // 防止过大的数量值
+        if ($quantity > 999999) {
+            throw new InvalidBillDataException('数量不能超过999999');
+        }
     }
 }

@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\Symfony\BillOrderBundle\Entity;
 
-use Brick\Math\BigDecimal;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -14,6 +15,7 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\Symfony\BillOrderBundle\Enum\BillItemStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillItemRepository;
+use Tourze\Symfony\BillOrderBundle\Service\AmountCalculator;
 
 #[ORM\Entity(repositoryClass: BillItemRepository::class)]
 #[ORM\Table(name: 'order_bill_item', options: ['comment' => '账单明细'])]
@@ -163,10 +165,12 @@ class BillItem implements \Stringable
 
     /**
      * 计算小计金额
+     *
+     * 使用统一的金额计算工具确保计算一致性
      */
     private function calculateSubtotal(): void
     {
-        $this->subtotal = BigDecimal::of($this->price)->multipliedBy($this->quantity)->toScale(2);
+        $this->subtotal = AmountCalculator::calculateSubtotal($this->price, $this->quantity);
     }
 
     public function getRemark(): ?string

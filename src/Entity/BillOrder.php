@@ -1,8 +1,9 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Tourze\Symfony\BillOrderBundle\Entity;
 
-use Brick\Math\BigDecimal;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -15,6 +16,7 @@ use Tourze\DoctrineTimestampBundle\Traits\TimestampableAware;
 use Tourze\DoctrineUserBundle\Traits\BlameableAware;
 use Tourze\Symfony\BillOrderBundle\Enum\BillOrderStatus;
 use Tourze\Symfony\BillOrderBundle\Repository\BillOrderRepository;
+use Tourze\Symfony\BillOrderBundle\Service\AmountCalculator;
 
 #[ORM\Entity(repositoryClass: BillOrderRepository::class)]
 #[ORM\Table(name: 'order_bill_order', options: ['comment' => '账单表'])]
@@ -167,18 +169,12 @@ class BillOrder implements \Stringable
 
     /**
      * 计算账单总金额
+     *
+     * 使用统一的金额计算工具确保计算一致性
      */
     public function calculateTotalAmount(): void
     {
-        $total = '0';
-
-        foreach ($this->items as $item) {
-            $subtotal = $item->getSubtotal();
-            if ('' !== $subtotal) {
-                $total = BigDecimal::of($total)->plus($subtotal)->toScale(2);
-            }
-        }
-
+        $total = AmountCalculator::calculateTotalAmount($this->items->toArray());
         $this->setTotalAmount($total);
     }
 }
