@@ -25,7 +25,6 @@
     "symfony/http-kernel": "^7.3",
     "symfony/property-access": "^7.3",
     "symfony/uid": "^7.3",
-    "tourze/biz-user-bundle": "0.0.*",
     "tourze/bundle-dependency": "1.*",
     "tourze/doctrine-indexed-bundle": "1.0.*",
     "tourze/doctrine-ip-bundle": "1.0.*",
