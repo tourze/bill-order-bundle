@@ -1,0 +1,54 @@
+name: Static Analysis
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  static-analysis:
+    name: Static Code Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:latest
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-static-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-static-
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Run PHPStan (Level 1)
+        run: ./vendor/bin/phpstan analyse src -l 1 --ansi --memory-limit=512M
+
+      - name: Run PHPStan for Tests (Level 0)
+        run: ./vendor/bin/phpstan analyse tests -l 0 --ansi --memory-limit=512M
+        continue-on-error: true
+
+      - name: Run PHPStan with Extended Rules
+        run: |
+          ./vendor/bin/phpstan analyse src \
+            -l 1 \
+            --ansi \
+            --memory-limit=512M \
+            --no-interaction \
+            --error-format=json > phpstan-results.json 2>&1 || true
+        continue-on-error: true

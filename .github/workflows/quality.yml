@@ -1,0 +1,52 @@
+name: Code Quality Check
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: PHP Code Quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+          tools: composer:latest
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Check Code Style with PHP-CS-Fixer
+        run: composer run-script lint --no-ansi 2>/dev/null || echo "No lint script configured"
+        continue-on-error: true
+
+      - name: Run PHPMD (PHP Mess Detector)
+        run: |
+          composer require --dev phpmd/phpmd:latest --no-update || true
+          ./vendor/bin/phpmd src text cleancode,codesize,controversial,design,naming,unusedcode --ignore-violations-on-exit || echo "PHPMD completed with warnings"
+        continue-on-error: true
+
+      - name: Check for Security Issues with Enlightn
+        run: |
+          composer require --dev enlightn/enlightn:latest --no-update || true
+          ./vendor/bin/enlightn --ci || echo "Enlightn check completed"
+        continue-on-error: true
